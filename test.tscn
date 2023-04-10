@@ -1,0 +1,271 @@
+[gd_scene load_steps=29 format=3 uid="uid://6bswqlnyq2lr"]
+
+[ext_resource type="Shader" path="res://shaders/fluid3D.gdshader" id="1_mpmvm"]
+[ext_resource type="Shader" path="res://test.gdshader" id="2_hy7bb"]
+[ext_resource type="ArrayMesh" uid="uid://dlvouybkesjvq" path="res://house.obj" id="3_ra8lq"]
+[ext_resource type="Script" path="res://Camera3D.gd" id="4_uy1gs"]
+[ext_resource type="Shader" path="res://skyShader.gdshader" id="5_ig6nb"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_17tfg"]
+frequency = 0.548
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_nmu3o"]
+seamless = true
+noise = SubResource("FastNoiseLite_17tfg")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_76qp8"]
+shader = ExtResource("5_ig6nb")
+shader_parameter/offset_horizon = 0.0
+shader_parameter/horizon_intensity = -3.3
+shader_parameter/sun_set = Color(0.980392, 0.72549, 0.545098, 1)
+shader_parameter/horizon_color_day = Color(0, 0.8, 1, 1)
+shader_parameter/horizon_color_night = Color(0, 0, 0, 1)
+shader_parameter/sun_color = Color(1, 1, 1, 1)
+shader_parameter/sun_radius = 0.5
+shader_parameter/flat_sun = true
+shader_parameter/moon_color = Color(1, 1, 1, 1)
+shader_parameter/moon_radius = 0.15
+shader_parameter/moon_crescent = -0.25
+shader_parameter/dark_falloff = 4.0
+shader_parameter/day_bottom_color = Color(0.4, 1, 1, 1)
+shader_parameter/day_top_color = Color(0, 0.8, 1, 1)
+shader_parameter/night_bottom_color = Color(0, 0, 0.2, 1)
+shader_parameter/night_top_color = Color(0, 0, 0, 1)
+shader_parameter/base_noise_scale = 0.0
+shader_parameter/stars_speed = 0.3
+shader_parameter/stars_cutoff = 1.0
+shader_parameter/stars_sky_color = Color(0, 0.12549, 0.054902, 1)
+shader_parameter/stars_texture = SubResource("NoiseTexture2D_nmu3o")
+shader_parameter/base_noise = SubResource("NoiseTexture2D_nmu3o")
+
+[sub_resource type="Sky" id="Sky_o47lf"]
+sky_material = SubResource("ShaderMaterial_76qp8")
+radiance_size = 0
+
+[sub_resource type="Environment" id="Environment_nnfbk"]
+background_mode = 2
+sky = SubResource("Sky_o47lf")
+ambient_light_source = 3
+ambient_light_sky_contribution = 0.5
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="GDScript" id="GDScript_mts0p"]
+script/source = "extends DirectionalLight3D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	rotation.x+=delta
+"
+
+[sub_resource type="Gradient" id="Gradient_gxc0s"]
+offsets = PackedFloat32Array(0, 0.677165, 0.889764)
+colors = PackedColorArray(0, 0.34902, 0.513726, 1, 0, 0.745098, 0.745098, 0.815686, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_u7mnt"]
+gradient = SubResource("Gradient_gxc0s")
+width = 64
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_n51v2"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_66idg"]
+seamless = true
+noise = SubResource("FastNoiseLite_n51v2")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ql33p"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_o0vva"]
+seamless = true
+noise = SubResource("FastNoiseLite_ql33p")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s8jk6"]
+render_priority = 0
+shader = ExtResource("1_mpmvm")
+shader_parameter/fluidScale = Vector2(1, 1)
+shader_parameter/layerCount = 5
+shader_parameter/flowDirection0 = Vector2(0.002, -0.002)
+shader_parameter/flowDirection1 = Vector2(-0.005, 0.005)
+shader_parameter/rippleStrength = 0.666
+shader_parameter/distortion = 32.0
+shader_parameter/waterFallModifiers = Quaternion(1, 8, 8, 0.875)
+shader_parameter/rippleShore = true
+shader_parameter/remap_normals = true
+shader_parameter/ripples = null
+shader_parameter/colorMap = SubResource("GradientTexture1D_u7mnt")
+shader_parameter/fluid0 = SubResource("NoiseTexture2D_66idg")
+shader_parameter/fluid1 = SubResource("NoiseTexture2D_o0vva")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_p7i6r"]
+material = SubResource("ShaderMaterial_s8jk6")
+size = Vector2(256, 256)
+subdivide_depth = 32
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r33kh"]
+render_priority = 0
+shader = ExtResource("2_hy7bb")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(0.290196, 0.913725, 0.403922, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yjecn"]
+material = SubResource("ShaderMaterial_r33kh")
+size = Vector3(128, 1, 128)
+subdivide_depth = 32
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1ks1h"]
+render_priority = 0
+shader = ExtResource("2_hy7bb")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(0.92549, 0.384314, 0.298039, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h08b4"]
+render_priority = 0
+shader = ExtResource("2_hy7bb")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(0.521569, 0.164706, 0.360784, 1)
+
+[sub_resource type="Shader" id="Shader_osg63"]
+code = "shader_type spatial;
+render_mode cull_disabled,world_vertex_coords;
+global uniform vec3 wrapAround;
+
+global uniform bool active;
+// Set \"remap_normals\" to true if you want lighting to take place after displacement
+uniform bool remap_normals = true;
+// Use RADIUS to determine how warped the world should be.
+global uniform float RADIUS;
+global uniform bool hang;
+
+uniform vec3 color:source_color;
+
+void vertex(){
+	//rolling log
+	// Vertex displacement math, as a function of dist_z, dist_y
+	float dist_z = VERTEX.z - wrapAround.z;
+	float dist_y = VERTEX.y;
+	// Dz and theta is calculated from RADIUS for use in the transform. 
+	float Dz = PI*RADIUS/2.0;
+	float theta = dist_z / RADIUS;
+	
+	// Calculate which \"side\" we're on
+	// 1 and -1 represent \"hanging towel\"
+	// 0 represents the \"rolling log\" part
+	int side;
+	if (active) {
+		if (dist_z > Dz) {
+			side = 1;
+		} else if (dist_z < -Dz) {
+			side = -1;
+		} else {
+			side = 0;
+		}
+		
+		// set side = 0 if you want a log without \"hanging sides\"
+		if (!hang) { side = 0; }
+		if (side == 1) {
+			// positive vertical side
+			VERTEX.y = -(dist_z - Dz) - RADIUS;
+			VERTEX.z = dist_y + RADIUS;
+		}
+		if (side == -1) {
+			// negative vertical side
+			VERTEX.y = (dist_z + Dz) - RADIUS;
+			VERTEX.z = - (dist_y + RADIUS);
+		}
+		if (side == 0) {
+			// rolling log
+			VERTEX.y = (dist_y + RADIUS)*cos(theta) - RADIUS;
+			VERTEX.z = (dist_y + RADIUS)*sin(theta) ;
+		}
+		// reposition world vertices
+		VERTEX.z += wrapAround.z;
+	}
+	// todo - recalculate normals
+	if (remap_normals) {
+		if (side == 1) {
+			//vec3 normal = normalize(vec3(NORMAL.x, -NORMAL.z, NORMAL.y));
+			vec3 normal = normalize(vec3(0.0, 1.0, 0.0));
+			NORMAL = normal;
+		} else if (side == -1) {
+			//vec3 normal = normalize(vec3(NORMAL.x, NORMAL.z, -NORMAL.y));
+			vec3 normal = normalize(vec3(0.0, 1.0, 0.0));
+			NORMAL = normal;
+		} else if (side == 0) {
+			// todo - check this math!
+			vec3 normal = normalize(vec3(
+				NORMAL.x,
+				NORMAL.y * cos(theta) - NORMAL.z * sin(theta),
+				NORMAL.z * cos(theta) + NORMAL.z * sin(theta)
+			));
+			NORMAL = normal;
+		}
+	}
+}
+
+void fragment(){
+	ALBEDO.rgb=color;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kk4hg"]
+render_priority = 0
+shader = SubResource("Shader_osg63")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(0.756863, 0.52549, 0.247059, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bui2l"]
+render_priority = 0
+shader = ExtResource("2_hy7bb")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(0, 0.831373, 0.917647, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rs7hq"]
+render_priority = 0
+shader = ExtResource("2_hy7bb")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hcp8c"]
+render_priority = 0
+shader = ExtResource("2_hy7bb")
+shader_parameter/remap_normals = true
+shader_parameter/color = Color(0.564706, 0.572549, 0.658824, 1)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_nnfbk")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(1, 0, 0, 0, 0.945263, -0.32631, 0, 0.32631, 0.945263, 0, 27.425, 0)
+directional_shadow_mode = 0
+directional_shadow_fade_start = 1.0
+directional_shadow_max_distance = 0.0
+script = SubResource("GDScript_mts0p")
+
+[node name="fluid" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_p7i6r")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_yjecn")
+
+[node name="House" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 1.5, -12.9815)
+extra_cull_margin = 16.0
+mesh = ExtResource("3_ra8lq")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("ShaderMaterial_1ks1h")
+surface_material_override/1 = SubResource("ShaderMaterial_h08b4")
+surface_material_override/2 = SubResource("ShaderMaterial_kk4hg")
+surface_material_override/3 = SubResource("ShaderMaterial_bui2l")
+surface_material_override/4 = SubResource("ShaderMaterial_rs7hq")
+surface_material_override/5 = SubResource("ShaderMaterial_hcp8c")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 20, 0)
+current = true
+script = ExtResource("4_uy1gs")

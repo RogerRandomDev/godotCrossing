@@ -1,0 +1,55 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Godot Crossing"
+run/main_scene="res://test.tscn"
+config/features=PackedStringArray("4.0", "Forward Plus")
+config/icon="res://icon.svg"
+
+[shader_globals]
+
+wrapAround={
+"type": "vec3",
+"value": Vector3(0, 0, -16)
+}
+active={
+"type": "bool",
+"value": true
+}
+hang={
+"type": "bool",
+"value": true
+}
+RADIUS={
+"type": "float",
+"value": 48.0
+}
+dayColor={
+"type": "color",
+"value": Color(0.0862745, 0.854902, 0.960784, 1)
+}
+nightColor={
+"type": "color",
+"value": Color(0, 0, 0, 1)
+}
+duskColor={
+"type": "color",
+"value": Color(1, 0.447059, 0.207843, 1)
+}
+duskFalloff={
+"type": "float",
+"value": 2.0
+}
+currentTime={
+"type": "float",
+"value": 0.0
+}
