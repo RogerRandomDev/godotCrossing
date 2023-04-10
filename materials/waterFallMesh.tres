@@ -1,0 +1,13 @@
+[gd_resource type="PlaneMesh" load_steps=2 format=3 uid="uid://cqt0yanve1yrm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4nadm"]
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[resource]
+material = SubResource("StandardMaterial3D_4nadm")
+size = Vector2(0.75, 0.75)
+orientation = 2

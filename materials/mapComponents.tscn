@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=3 uid="uid://craq4p6htvueo"]
+
+[ext_resource type="Material" uid="uid://1p305aslkkfa" path="res://materials/ground.tres" id="1_sutn3"]
+[ext_resource type="Material" uid="uid://bpwhjkyckh2u0" path="res://materials/cliffTop.tres" id="2_hhy7u"]
+[ext_resource type="Material" uid="uid://bkevgqs6th65i" path="res://materials/cliff.tres" id="3_aeinc"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_srsg2"]
+material = ExtResource("2_hhy7u")
+
+[sub_resource type="BoxMesh" id="BoxMesh_5hedp"]
+material = ExtResource("3_aeinc")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_383li"]
+material = ExtResource("1_sutn3")
+size = Vector2(1.414, 1)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Grass" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+sorting_offset = 32.0
+mesh = SubResource("BoxMesh_srsg2")
+
+[node name="Cliff" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+mesh = SubResource("BoxMesh_5hedp")
+
+[node name="slopeGrassR" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0, 1, 0, 0, 1)
+sorting_offset = 32.0
+mesh = SubResource("PlaneMesh_383li")
+skeleton = NodePath("../Grass")
+
+[node name="slopeGrassL" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0, 1, 0, 0, 1)
+sorting_offset = 32.0
+mesh = SubResource("PlaneMesh_383li")
+skeleton = NodePath("../Grass")
+
+[node name="slopeGrassU" type="MeshInstance3D" parent="."]
+transform = Transform3D(-2.98023e-08, -2.98023e-08, 1, -0.707107, 0.707107, 0, -0.707107, -0.707107, -4.37114e-08, 0, 0, 1)
+sorting_offset = 32.0
+mesh = SubResource("PlaneMesh_383li")
+skeleton = NodePath("../Grass")
+
+[node name="slopeGrassD" type="MeshInstance3D" parent="."]
+transform = Transform3D(-3.09086e-08, 3.09086e-08, 1, 0.707107, 0.707107, -1.16573e-15, -0.707107, 0.707107, -4.52759e-08, 0, 0, 1)
+sorting_offset = 32.0
+mesh = SubResource("PlaneMesh_383li")
+skeleton = NodePath("../Grass")

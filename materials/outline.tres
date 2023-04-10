@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://drx0rhahceim5"]
+
+[ext_resource type="Shader" path="res://shaders/outline.gdshader" id="1_h5vap"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_h5vap")
+shader_parameter/remap_normals = true

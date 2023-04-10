@@ -1,0 +1,116 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b6ayvpoqfkxtb"]
+
+[ext_resource type="Texture2D" uid="uid://bvi2h71koliuf" path="res://textures/80_336.png" id="1_i1mbs"]
+
+[sub_resource type="Shader" id="Shader_r8av0"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.0.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx,world_vertex_coords;
+uniform sampler2D texture_albedo : source_color,filter_nearest,repeat_enable;
+varying vec3 uv1_triplanar_pos;
+uniform float uv1_blend_sharpness;
+varying vec3 uv1_power_normal;
+
+global uniform vec3 wrapAround;
+// player_pos updated in Ground.gd, used to calculate distance from player
+// Set \"active\" to  false  to turn off the displacement shader.
+global uniform bool active;
+// Set \"remap_normals\" to true if you want lighting to take place after displacement
+uniform bool remap_normals = true;
+// Use RADIUS to determine how warped the world should be.
+global uniform float RADIUS;
+global uniform bool hang;
+
+void vertex() {
+	uv1_power_normal=abs(NORMAL);
+	uv1_triplanar_pos = VERTEX;
+	uv1_power_normal/=dot(uv1_power_normal,vec3(1.0));
+	uv1_triplanar_pos *= vec3(1.0,-1.0, 1.0);
+	//rolling log
+	// Vertex displacement math, as a function of dist_z, dist_y
+	float dist_z = VERTEX.z - wrapAround.z;
+	float dist_y = VERTEX.y;
+	// Dz and theta is calculated from RADIUS for use in the transform. 
+	float Dz = PI*RADIUS/2.0;
+	float theta = dist_z / RADIUS;
+	
+	// Calculate which \"side\" we're on
+	// 1 and -1 represent \"hanging towel\"
+	// 0 represents the \"rolling log\" part
+	int side;
+	if (active) {
+		if (dist_z > Dz) {
+			side = 1;
+		} else if (dist_z < -Dz) {
+			side = -1;
+		} else {
+			side = 0;
+		}
+		
+		// set side = 0 if you want a log without \"hanging sides\"
+		if (!hang) { side = 0; }
+		if (side == 1) {
+			// positive vertical side
+			VERTEX.y = -(dist_z - Dz) - RADIUS;
+			VERTEX.z = dist_y + RADIUS;
+		}
+		if (side == -1) {
+			// negative vertical side
+			VERTEX.y = (dist_z + Dz) - RADIUS;
+			VERTEX.z = - (dist_y + RADIUS);
+		}
+		if (side == 0) {
+			// rolling log
+			VERTEX.y = (dist_y + RADIUS)*cos(theta) - RADIUS;
+			VERTEX.z = (dist_y + RADIUS)*sin(theta) ;
+		}
+		// reposition world vertices
+		VERTEX.z += wrapAround.z;
+	}
+	// todo - recalculate normals
+	if (remap_normals) {
+		if (side == 1) {
+			//vec3 normal = normalize(vec3(NORMAL.x, -NORMAL.z, NORMAL.y));
+			vec3 normal = normalize(vec3(0.0, 1.0, 0.0));
+			NORMAL = normal;
+		} else if (side == -1) {
+			//vec3 normal = normalize(vec3(NORMAL.x, NORMAL.z, -NORMAL.y));
+			vec3 normal = normalize(vec3(0.0, 1.0, 0.0));
+			NORMAL = normal;
+		} else if (side == 0) {
+			// todo - check this math!
+			vec3 normal = normalize(vec3(
+				NORMAL.x,
+				NORMAL.y * cos(theta) - NORMAL.z * sin(theta),
+				NORMAL.z * cos(theta) + NORMAL.z * sin(theta)
+			));
+			NORMAL = normal;
+		}
+	}
+}
+
+
+
+
+vec4 triplanar_texture(sampler2D p_sampler,vec3 p_weights,vec3 p_triplanar_pos) {
+	vec4 samp=vec4(0.0);
+	samp+= texture(p_sampler,p_triplanar_pos.xy) * p_weights.z;
+	samp+= texture(p_sampler,p_triplanar_pos.xz) * p_weights.y;
+	samp+= texture(p_sampler,p_triplanar_pos.zy * vec2(-1.0,1.0)) * p_weights.x;
+	return samp;
+}
+
+
+void fragment() {
+	vec4 albedo_tex = triplanar_texture(texture_albedo,uv1_power_normal,uv1_triplanar_pos);
+	ALBEDO = albedo_tex.rgb;
+}
+"
+
+[resource]
+render_priority = 0
+shader = SubResource("Shader_r8av0")
+shader_parameter/uv1_blend_sharpness = 1.0
+shader_parameter/remap_normals = true
+shader_parameter/texture_albedo = ExtResource("1_i1mbs")
