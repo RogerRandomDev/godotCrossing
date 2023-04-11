@@ -4,7 +4,7 @@
 code = "// NOTE: Shader automatically converted from Godot Engine 4.0.1.stable's StandardMaterial3D.
 
 shader_type spatial;
-render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,world_vertex_coords;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_toon,world_vertex_coords;
 uniform vec4 albedo : source_color;
 
 global uniform vec3 wrapAround;

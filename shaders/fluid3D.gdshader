@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_back;
+render_mode cull_back,diffuse_toon;
 uniform sampler2D SCREEN_TEXTURE:hint_screen_texture;
 uniform sampler2D DEPTH_TEXTURE:hint_depth_texture,filter_linear;
 //gradient texture for the fluid colors

@@ -1,7 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://craq4p6htvueo"]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Material" uid="uid://1p305aslkkfa" path="res://materials/ground.tres" id="1_sutn3"]
-[ext_resource type="Material" uid="uid://bpwhjkyckh2u0" path="res://materials/cliffTop.tres" id="2_hhy7u"]
+[ext_resource type="Material" uid="uid://bpwhjkyckh2u0" path="res://cliffTop.tres" id="2_hhy7u"]
 [ext_resource type="Material" uid="uid://bkevgqs6th65i" path="res://materials/cliff.tres" id="3_aeinc"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_srsg2"]
