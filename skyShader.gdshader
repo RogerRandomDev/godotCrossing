@@ -1,118 +1,61 @@
 shader_type sky;
-render_mode use_half_res_pass;
+render_mode use_quarter_res_pass;
+
+uniform vec3 shortFrequency:source_color;
+uniform vec3 midFrequency:source_color;
+uniform vec3 longFrequency:source_color;
+
+uniform float midFrequencyStrength:hint_range(0.,1.);
+
+uniform float horizonDuration:hint_range(-1.,1.);
+
+uniform float sunSize:hint_range(0.,0.25);
+
+uniform sampler2D starNoise:repeat_enable;
+
+uniform float starCutoff:hint_range(0.,1.);
 
 
-// Sky Gradients
-uniform vec3 day_bottom_color : source_color = vec3(1.0, 1.0, 1.0);
-uniform vec3 day_top_color : source_color = vec3(1.0, 1.0, 1.0);
-
-uniform vec3 sunset_bottom_color : source_color = vec3(0.0, 0.0, 0.0);
-uniform vec3 sunset_top_color : source_color = vec3(0.0, 0.0, 0.0);
-
-uniform vec3 night_bottom_color : source_color = vec3(0.0, 0.0, 0.0);
-uniform vec3 night_top_color : source_color = vec3(0.0, 0.0, 0.0);
-
-
-// Horizon Stuff
-uniform vec3 horizon_color_day : source_color = vec3(1.0, 1.0, 1.0);
-uniform vec3 horizon_color_sunset : source_color = vec3(1.0, 1.0, 1.0);
-uniform vec3 horizon_color_night : source_color = vec3(0.0, 0.8, 1.0);
-uniform float horizon_falloff: hint_range(0.0, 1.0, 0.1);
-
-
-// Sun Stuff
-uniform vec3 sun_col: source_color = vec3(1.0);
-uniform float sun_size: hint_range(0.01, 1.0) = 1.0;
-uniform float sun_blur: hint_range(0.01, 1.0) = 0.01;
-
-
-// Moon Stuff
-uniform vec3 moon_col: source_color = vec3(1.0);
-uniform float moon_size: hint_range(0.01, 1.0) = 1.0;
-uniform float moon_crescent_offset: hint_range(-1.0, 1.0) = 0.5;
-
-
-
-// Star Stuff
-uniform sampler2D stars_texture: filter_linear_mipmap;
-uniform float stars_cutoff;
-uniform float stars_speed: hint_range(0.0, 0.1);
-
-
-
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 
 void sky() {
-	vec2 sky_uv = EYEDIR.xz / EYEDIR.y;
 	
+	vec3 sky_color;
+	float distToSun=distance(LIGHT0_DIRECTION,-EYEDIR);
+	//calculate strength for each frequency based on sun angle
+	float shortFrequencyStrength=(
+		distance(-abs(LIGHT0_DIRECTION.y),EYEDIR.y)
+	);
+	float longFrequencyStrength=(1.-shortFrequencyStrength);
 	
-	float day_amount = clamp(LIGHT0_DIRECTION.y, 0.0, 1.0);
-	vec3 gradient_day = mix(day_bottom_color, day_top_color, clamp(EYEDIR.y, 0.0, 1.0)) * day_amount;
+	vec3 shortCol=shortFrequency*shortFrequencyStrength+midFrequencyStrength;
+	vec3 midCol=midFrequency*midFrequencyStrength;
+	vec3 longCol=longFrequency*(longFrequencyStrength-midFrequencyStrength);
+	float light_blockage=clamp(
+		(
+			LIGHT0_DIRECTION.y+horizonDuration
+		),0.,1.
+	);
+	sky_color=(
+		(shortCol+midCol+longCol)/3.+
+		vec3(float(distToSun<sunSize))
+		)*(1.-light_blockage);
+	float starStrength=texture(starNoise,EYEDIR.xy-LIGHT0_DIRECTION.xz).r;
+	vec3 starColor=vec3(1.)*(
+		float(
+			starStrength<(light_blockage)*starCutoff
+			)
+	);
 	
-	float night_amount = clamp(-LIGHT0_DIRECTION.y, 0.0, 1.0);
-	vec3 gradient_night = mix(night_bottom_color, night_top_color, clamp(EYEDIR.y, 0.0, 1.0)) * night_amount;
+	vec3 outputColor=sky_color+starColor;
 	
-	//float sunset_amount = clamp(1.0 - abs(LIGHT0_DIRECTION.y), 0.0, 1.0);
-	vec3 gradient_sunset = mix(sunset_bottom_color, sunset_top_color, clamp(EYEDIR.y, 0.0, 1.0)) * (1.-(day_amount+night_amount)*1.5);
-	
-	vec3 sky_gradients = gradient_day + gradient_sunset + gradient_night;
-	
-	
-	
-	
-	float horizon = 1.0 - abs(EYEDIR.y + horizon_falloff);
-	
-	vec3 horizon_glow_amount_day = clamp(horizon * clamp(LIGHT0_DIRECTION.y, 0.0, 1.0), 0.0, 1.0) * horizon_color_day;
-	vec3 horizon_glow_amount_sunset = clamp(horizon * clamp(1.0 - abs(LIGHT0_DIRECTION.y), 0.0, 1.0), 0.0, 1.0) * horizon_color_sunset;
-	vec3 horizon_glow_night = clamp(horizon * clamp(-LIGHT0_DIRECTION.y, 0.0, 1.0), 0.0, 1.0) * horizon_color_night;
-	
-	vec3 horizon_glow = horizon_glow_amount_day + horizon_glow_amount_sunset + horizon_glow_night;
-	
-	
-	
-	
-	
-	float sun_distance = distance(EYEDIR.xyz, LIGHT0_DIRECTION);
-	float sun_power = 1.0 - clamp(sun_distance / sun_size, 0.0, 1.0);
-	float sun_disc = clamp(sun_power / sun_blur, sun_power, 1.0);
-	vec3 sun = sun_col * sun_disc;
-	
-	
-	
-	float moon_distance = distance(EYEDIR.xyz, -LIGHT0_DIRECTION);
-	float moon_power = 1.0 - clamp(moon_distance / moon_size, 0.0, 1.0);
-	float moon_disc = clamp(moon_power / 0.01, moon_power, 1.0);
-	
-	float moon_crescent_distance = distance(vec3(EYEDIR.x + moon_crescent_offset, EYEDIR.yz), -LIGHT0_DIRECTION);
-	float moon_crescent_power = 1.0 - clamp(moon_crescent_distance / moon_size, 0.0, 1.0);
-	float moon_crescent_disc = clamp(moon_crescent_power / 0.01, moon_crescent_power, 1.0);
-	
-	vec3 moon_crescent = moon_col * moon_crescent_disc;
-	
-	vec3 moon = clamp( (moon_col * moon_disc) - moon_crescent, 0.0 , 1.0);
+	COLOR=outputColor;
 	
 	
 	
-	
-	
-	
-	
-	vec3 stars = texture(stars_texture, EYEDIR.xy+ (stars_speed * TIME)).rgb;
-	stars *= clamp(-(LIGHT0_DIRECTION.y)+0.1, 0.0, 1.0);
-	stars = step(stars_cutoff, stars);
-	
-	
-	
-	vec3 sun_moon = sun + moon;
-	sun_moon = clamp(sun_moon, 0.0, 1.0);
-	
-	sky_gradients = clamp(sky_gradients, 0.0, 1.0);
-	
-	
-	
-	vec3 sky = horizon_glow + sky_gradients + sun_moon + stars;
-	
-	
-	
-	COLOR = sky;
 }
